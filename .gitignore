@@ -1,0 +1,61 @@
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# Environment variables / secrets
+.env
+.env.*
+!.env.example
+
+# Jupyter
+.ipynb_checkpoints/
+
+
+# macOS
+.DS_Store
+
+
+# VS Code
+.vscode/
+
+
+# Python tooling / testing
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# Build / package artifacts
+build/
+dist/
+*.egg-info/
+
+
+# Project data (synthetic data doesn't require HIPPA protection, but files are large and reproducible)
+data/raw/*
+data/processed/*
+
+# Keep the directories themselves in the repository
+!data/raw/.gitkeep
+!data/processed/.gitkeep
+
+
+# Vector database
+
+# Embeddings/vector indexes can be regenerated
+vector_store/*
+
+# Keep directory in Git
+!vector_store/.gitkeep
+
+# Logs / temporary files
+*.log
+*.tmp
