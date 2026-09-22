@@ -3,3 +3,6 @@ pypdf
 
 # Environment variables
 python-dotenv
+
+# Hugging Face embeddings
+sentence-transformers
