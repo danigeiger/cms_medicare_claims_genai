@@ -68,3 +68,15 @@ not completely solve the ranking problem.
 
 Test a second-stage reranking strategy on the candidates returned by
 semantic search.
+
+## Experiment 3 - Created reranker.py (CrossEncoder) 
+
+Baseline Chroma Retrieval
+Top-1: 60%
+Top-3: 90%
+Top-5: 100%
+
+Chroma + CrossEncoder Reranking
+Top-1: 80%
+Top-3: 100%
+Top-5: 100%

@@ -51,3 +51,29 @@ def rerank(
     )
 
     return reranked_cms_candidates
+
+
+if __name__ == "__main__":
+    query = "What is the specialty of the attending physician?"
+
+    print("\n=== CMS Reranker Test ===\n")
+    print(f"Query: {query}\n")
+
+    reranked_cms_candidates = rerank(
+        query,
+        rerank_function_top_k=5,
+    )
+
+    print("Reranked CMS variable matches:\n")
+
+    for rank, candidate in enumerate(
+        reranked_cms_candidates,
+        start=1,
+    ):
+        print(f"{rank}. {candidate['variable']}")
+        print(f"   Label: {candidate['label']}")
+        print(
+            f"   Reranker score: "
+            f"{candidate['reranker_score']:.3f}"
+        )
+        print()
