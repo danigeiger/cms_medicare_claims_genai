@@ -11,13 +11,12 @@ KNOWLEDGE_BASE_PATH = (
     PROJECT_ROOT
     / "knowledge_base"
     / "processed"
-    / "cms_codebook_variables.json"
+    / "cms_codebook.json"
 )
 
-VECTOR_STORE_PATH = PROJECT_ROOT / "vector_store"
+CMS_CODEBOOK_VECTORS_PATH = PROJECT_ROOT / "cms_codebook_vectors"
 
-MODEL_NAME = "sentence-transformers/all-MiniLM-L6-v2"
-COLLECTION_NAME = "cms_codebook"
+
 
 def load_knowledge_base(json_path: Path) -> list[dict]:
     """Load the structured CMS codebook records from JSON."""
@@ -52,7 +51,7 @@ if __name__ == "__main__":
 
     print("\nLoading embedding model...")
 
-    model = SentenceTransformer(MODEL_NAME)
+    model = SentenceTransformer("sentence-transformers/all-MiniLM-L6-v2")
 
     embeddings = model.encode(
         documents,
@@ -63,37 +62,37 @@ if __name__ == "__main__":
     print(f"Embedding dimensions: {embeddings.shape[1]}")
 
 
-print("\nCreating Chroma vector store...")
+    print("\nCreating Chroma vector store...")
 
-client = chromadb.PersistentClient(
-    path=str(VECTOR_STORE_PATH)
-)
+    client = chromadb.PersistentClient(
+    path=str(CMS_CODEBOOK_VECTORS_PATH)
+    )
 
-collection = client.get_or_create_collection(
-    name=COLLECTION_NAME
-)
+    collection = client.get_or_create_collection(
+    name="cms_codebook"
+    )
 
 
-ids = [
-    variable["variable"]
+    ids = [
+        variable["variable"]
     for variable in variables
-]
+    ]
 
-metadatas = [
-    {
-        "variable": variable["variable"],
-        "label": variable["label"],
-    }
-    for variable in variables
-]
+    metadatas = [
+        {
+            "variable": variable["variable"],
+           "label": variable["label"],
+        }
+        for variable in variables
+    ]
 
 
-collection.upsert(
-    ids=ids,
-    documents=documents,
-    embeddings=embeddings.tolist(),
-    metadatas=metadatas,
-)
+    collection.upsert(
+        ids=ids,
+        documents=documents,
+        embeddings=embeddings.tolist(),
+        metadatas=metadatas,
+    )
 
-print(f"Records stored in Chroma: {collection.count()}")
-print(f"Vector store saved to: {VECTOR_STORE_PATH}")
+    print(f"Records stored in Chroma: {collection.count()}")
+    print(f"Vector store saved to: {CMS_CODEBOOK_VECTORS_PATH}")

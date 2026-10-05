@@ -6,24 +6,25 @@ from sentence_transformers import SentenceTransformer
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 
-VECTOR_STORE_PATH = PROJECT_ROOT / "vector_store"
+CMS_CODEBOOK_VECTORS_PATH = (PROJECT_ROOT / "cms_codebook_vectors")
 
-MODEL_NAME = "sentence-transformers/all-MiniLM-L6-v2"
-COLLECTION_NAME = "cms_codebook"
+model = SentenceTransformer("sentence-transformers/all-MiniLM-L6-v2")
+
 
 def get_collection():
     """Connect to the persistent Chroma collection."""
     client = chromadb.PersistentClient(
-        path=str(VECTOR_STORE_PATH)
+        path=str(CMS_CODEBOOK_VECTORS_PATH)
     )
 
     collection = client.get_collection(
-        name=COLLECTION_NAME
+        name= "cms_codebook"
     )
 
     return collection
 
-def create_query_embedding(query: str, model: SentenceTransformer):
+
+def create_query_embedding(query: str):
     """Convert a user's question into a normalized embedding vector."""
     embedding = model.encode(
         query,
@@ -33,21 +34,16 @@ def create_query_embedding(query: str, model: SentenceTransformer):
     return embedding
 
 
-def retrieve(query: str, top_k: int = 5) -> dict:
+def retrieve(query: str, retrieve_function_top_k: int = 5) -> dict:
     """Retrieve the most relevant CMS variables for a user query."""
 
-    model = SentenceTransformer(MODEL_NAME)
-
-    query_embedding = create_query_embedding(
-        query,
-        model,
-    )
+    query_embedding = create_query_embedding(query)
 
     collection = get_collection()
 
     results = collection.query(
         query_embeddings=[query_embedding.tolist()],
-        n_results=top_k,
+        n_results=retrieve_function_top_k,
     )
 
     return results
@@ -61,7 +57,7 @@ if __name__ == "__main__":
 
     results = retrieve(
         query,
-        top_k=5,
+        retrieve_function_top_k=5,
     )
 
     print("Top CMS variable matches:\n")
@@ -72,5 +68,8 @@ if __name__ == "__main__":
     ):
         print(f"{rank}. {metadata['variable']}")
         print(f"   Label: {metadata['label']}")
-        print(f"   Distance: {results['distances'][0][rank - 1]:.3f}")
+        print(
+            f"   Distance: "
+            f"{results['distances'][0][rank - 1]:.3f}"
+        )
         print()

@@ -52,6 +52,7 @@ data/processed/*
 
 # Embeddings/vector indexes can be regenerated
 vector_store/*
+cms_codebook_vectors/
 
 # Keep directory in Git
 !vector_store/.gitkeep

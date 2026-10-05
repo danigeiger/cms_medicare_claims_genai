@@ -1,11 +1,4 @@
-from sentence_transformers import SentenceTransformer
-
-from src.retrieval.semantic_search import (
-    KNOWLEDGE_BASE_PATH,
-    MODEL_NAME,
-    load_knowledge_base,
-    semantic_search,
-)
+from src.retrieval.retrieval import retrieve
 
 
 TEST_QUERIES = [
@@ -92,53 +85,36 @@ TEST_QUERIES = [
 ]
 
 
-def evaluate_retrieval(
-    test_queries: list[dict],
-    variables: list[dict],
-    model: SentenceTransformer,
-) -> None:
-    """Evaluate semantic retrieval using known query-variable pairs."""
+def evaluate_retrieval():
+    """Evaluate Chroma retrieval against known CMS variables."""
 
     top_1_correct = 0
     top_3_correct = 0
     top_5_correct = 0
 
-    print("\n=== CMS Retrieval Evaluation ===\n")
+    print("\n=== CMS Chroma Retrieval Evaluation ===\n")
 
-    for test in test_queries:
+    for test in TEST_QUERIES:
         query = test["query"]
         expected = test["expected"]
 
-        results = semantic_search(
-            query=query,
-            variables=variables,
-            model=model,
+        results = retrieve(
+            query,
             top_k=5,
         )
 
-        retrieved_variables = [
-            variable["variable"]
-            for variable, score in results
-        ]
+        metadatas = results["metadatas"][0]
+        distances = results["distances"][0]
 
-        print(f"Query: {query}")
-        print(f"Expected: {expected}")
+        retrieved_variables = [
+            metadata["variable"]
+            for metadata in metadatas
+        ]
 
         if expected in retrieved_variables:
             rank = retrieved_variables.index(expected) + 1
-            print(f"Found at rank: {rank}")
         else:
             rank = None
-            print("Found at rank: Not in top 5")
-
-        print("Top 5:")
-        for i, (variable, score) in enumerate(results, start=1):
-            print(
-                f"  {i}. {variable['variable']} "
-                f"({score:.3f})"
-            )
-
-        print()
 
         if rank == 1:
             top_1_correct += 1
@@ -149,25 +125,44 @@ def evaluate_retrieval(
         if rank is not None and rank <= 5:
             top_5_correct += 1
 
-    total = len(test_queries)
+        print(f"Query: {query}")
+        print(f"Expected: {expected}")
+        print(
+            f"Found at rank: "
+            f"{rank if rank is not None else 'Not in top 5'}"
+        )
+        print("Top 5:")
 
-    top_1_accuracy = top_1_correct / total
-    top_3_accuracy = top_3_correct / total
-    top_5_accuracy = top_5_correct / total
+        for i, metadata in enumerate(
+            metadatas,
+            start=1,
+        ):
+            distance = distances[i - 1]
+
+            print(
+                f"  {i}. {metadata['variable']} "
+                f"(distance: {distance:.3f})"
+            )
+
+        print()
+
+    total = len(TEST_QUERIES)
 
     print("=== Evaluation Results ===\n")
     print(f"Test queries: {total}")
-    print(f"Top-1 accuracy: {top_1_accuracy:.1%}")
-    print(f"Top-3 accuracy: {top_3_accuracy:.1%}")
-    print(f"Top-5 accuracy: {top_5_accuracy:.1%}")
+    print(
+        f"Top-1 accuracy: "
+        f"{top_1_correct / total:.1%}"
+    )
+    print(
+        f"Top-3 accuracy: "
+        f"{top_3_correct / total:.1%}"
+    )
+    print(
+        f"Top-5 accuracy: "
+        f"{top_5_correct / total:.1%}"
+    )
 
 
 if __name__ == "__main__":
-    variables = load_knowledge_base(KNOWLEDGE_BASE_PATH)
-    model = SentenceTransformer(MODEL_NAME)
-
-    evaluate_retrieval(
-        test_queries=TEST_QUERIES,
-        variables=variables,
-        model=model,
-    )
+    evaluate_retrieval()

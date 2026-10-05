@@ -7,9 +7,9 @@ from pypdf import PdfReader
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 
-CODEBOOK_PATH = (PROJECT_ROOT/"docs"/"cms_ffs_claims_codebook.pdf")
+CODEBOOK_PATH = (PROJECT_ROOT/"docs"/"cms_codebook.pdf")
 
-OUTPUT_PATH = (PROJECT_ROOT/"knowledge_base"/"processed"/"cms_codebook_variables.json")
+OUTPUT_PATH = (PROJECT_ROOT/"knowledge_base"/"processed"/"cms_codebook.json")
 
 
 
