@@ -1,8 +1,15 @@
+
 # PDF/document ingestion
 pypdf
 
 # Environment variables
 python-dotenv
 
-# Hugging Face embeddings
+# Hugging Face embeddings and CrossEncoder reranking
 sentence-transformers
+
+# Chroma vector database
+chromadb
+
+# OpenAI LLM for RAG
+openai
