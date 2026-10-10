@@ -13,3 +13,15 @@ chromadb
 
 # OpenAI LLM for RAG
 openai
+
+# FastAPI web application
+fastapi
+
+# ASGI server for running FastAPI
+uvicorn
+
+# Automated testing
+pytest
+
+# HTTP client for testing API endpoints
+httpx

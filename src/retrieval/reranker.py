@@ -16,7 +16,7 @@ def rerank(
 
     chroma_results = retrieve(
         query,
-        retrieve_function_top_k=rerank_function_top_k,
+        retrieve_function_top_k=20,
     )
 
     retrieved_cms_documents = chroma_results["documents"][0]
@@ -50,7 +50,7 @@ def rerank(
         reverse=True,
     )
 
-    return reranked_cms_candidates
+    return reranked_cms_candidates[:rerank_function_top_k]
 
 
 if __name__ == "__main__":
