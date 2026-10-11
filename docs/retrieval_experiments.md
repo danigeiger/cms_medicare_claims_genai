@@ -258,3 +258,66 @@ The current production-style pipeline remains unchanged pending end-to-end evalu
 A larger, independently constructed evaluation set should also be developed to assess performance on unseen natural-language questions.
 
 
+## Experiment: End-to-End RAG Evaluation with RRF
+
+### Objective
+
+Determine whether the improved retrieval accuracy from Reciprocal Rank Fusion (RRF) translates into more accurate final answers from GPT-4.1-mini.
+
+### Experimental Setup
+
+Two RAG pipelines were evaluated using the same 20 CMS codebook questions:
+
+- **Baseline:** Chroma → CrossEncoder → GPT-4.1-mini
+- **Experimental:** Chroma → CrossEncoder + RRF → GPT-4.1-mini
+
+Both pipelines used the same language model, instructions, structured output schema, and five retrieved context documents.
+
+**Evaluation metric:** Exact-match accuracy between the predicted CMS variable identifier and the expected variable.
+
+**Evaluation script:** `src/rag/evaluate_rrf_rag.py`
+
+### Results
+
+| Pipeline | Correct Answers | Accuracy |
+|---|---:|---:|
+| CrossEncoder + GPT-4.1-mini | 19/20 | 95% |
+| RRF + GPT-4.1-mini | 20/20 | **100%** |
+
+RRF improved end-to-end accuracy by 5 percentage points on the existing benchmark.
+
+### Error Analysis
+
+The only difference in final-answer correctness occurred for the question:
+
+**"Where was the service performed?"**
+
+Expected variable: `LINE_PLACE_OF_SRVC_CD`
+
+- CrossEncoder pipeline predicted `CLM_SRVC_FAC_ZIP_CD`.
+- RRF pipeline correctly predicted `LINE_PLACE_OF_SRVC_CD`.
+
+The baseline reranker placed the expected variable sixth, excluding it from the five documents passed to GPT-4.1-mini.
+
+RRF placed the expected variable first, allowing the language model to select it.
+
+### Interpretation
+
+The experiment demonstrates that retrieval-stage improvements can translate into better final-answer accuracy.
+
+RRF achieved 100% Top-5 retrieval accuracy and 100% end-to-end exact-match accuracy on the 20-question benchmark.
+
+However, the evaluation set is small, and its questions were used during retrieval development. These results do not establish performance on unseen questions.
+
+Additionally, the service-location question has multiple plausible interpretations, and RRF produced tied scores for the place-of-service and facility-ZIP variables.
+
+### Conclusion
+
+RRF outperformed the CrossEncoder-only pipeline on the existing end-to-end benchmark without introducing additional incorrect answers.
+
+RRF is the preferred candidate for further development, subject to validation on a larger, independent evaluation set.
+
+**Next steps:**
+1. Refactor retrieval to avoid duplicate Chroma queries.
+2. Integrate RRF into the RAG pipeline while retaining the CrossEncoder baseline.
+3. Evaluate both pipelines on unseen natural-language questions.
