@@ -5,7 +5,7 @@ from openai import OpenAI
 from src.rag.rag import CMSAnswer, format_cms_context
 from src.retrieval.evaluate_retrieval import TEST_QUERIES
 from src.retrieval.retrieval import retrieve
-from src.retrieval.reranker import rerank
+from src.retrieval.reranker import rerank_candidates
 from src.retrieval.evaluate_rrf import calculate_rrf
 
 
@@ -52,6 +52,8 @@ def generate_answer(query, candidates):
 
 
 def evaluate():
+    """Compare CrossEncoder and RRF end-to-end RAG accuracy."""
+
     scores = {
         "CrossEncoder": 0,
         "RRF": 0,
@@ -63,7 +65,7 @@ def evaluate():
         query = test_case["query"]
         expected = test_case["expected"]
 
-        # Retrieve candidates and their original Chroma ranks
+        # Step 1: Retrieve candidates from Chroma once
         chroma_results = retrieve(
             query,
             retrieve_function_top_k=20,
@@ -71,10 +73,11 @@ def evaluate():
 
         chroma_ids = chroma_results["ids"][0]
 
-        # Rerank the same query with CrossEncoder
-        reranked = rerank(
+        # Step 2: Rerank the SAME candidates with CrossEncoder
+        reranked = rerank_candidates(
             query,
-            rerank_function_top_k=20,
+            chroma_results,
+            top_k=20,
         )
 
         reranked_ids = [
@@ -82,18 +85,19 @@ def evaluate():
             for candidate in reranked
         ]
 
-        # Build RRF ranking
+        # Step 3: Fuse Chroma and CrossEncoder rankings
         rrf_ids = calculate_rrf(
             chroma_ids,
             reranked_ids,
         )
 
-        # Look up complete candidate dictionaries
+        # Step 4: Build candidate lookup
         candidate_lookup = {
             candidate["variable"]: candidate
             for candidate in reranked
         }
 
+        # Step 5: Select top 5 candidates per strategy
         crossencoder_candidates = reranked[:5]
 
         rrf_candidates = [
@@ -101,7 +105,7 @@ def evaluate():
             for variable in rrf_ids[:5]
         ]
 
-        # Run both pipelines through the same LLM
+        # Step 6: Generate answers using the same LLM
         crossencoder_answer = generate_answer(
             query,
             crossencoder_candidates,
@@ -112,6 +116,7 @@ def evaluate():
             rrf_candidates,
         )
 
+        # Step 7: Evaluate exact variable matches
         crossencoder_correct = (
             crossencoder_answer.variable == expected
         )

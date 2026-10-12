@@ -1,7 +1,7 @@
 
 from src.retrieval.evaluate_retrieval import TEST_QUERIES
 from src.retrieval.retrieval import retrieve
-from src.retrieval.reranker import rerank
+from src.retrieval.reranker import rerank_candidates
 
 
 def calculate_rrf(chroma_ids, reranked_ids, rrf_k=60):
@@ -55,9 +55,10 @@ def evaluate_rrf():
         chroma_ids = chroma_results["ids"][0]
 
         # Rerank 20 candidates with CrossEncoder
-        reranked_results = rerank(
-            query,
-            rerank_function_top_k=20,
+        reranked_results = rerank_candidates(
+        query,
+        chroma_results,
+        top_k=20,
         )
 
         reranked_ids = [

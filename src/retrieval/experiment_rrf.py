@@ -1,6 +1,6 @@
 
 from src.retrieval.retrieval import retrieve
-from src.retrieval.reranker import rerank
+from src.retrieval.reranker import rerank_candidates
 
 
 def reciprocal_rank_fusion(query: str, top_k: int = 5, rrf_k: int = 60):
@@ -16,9 +16,10 @@ def reciprocal_rank_fusion(query: str, top_k: int = 5, rrf_k: int = 60):
     chroma_ids = chroma_results["ids"][0]
 
     # Stage 2: Get the CrossEncoder ranking of those candidates
-    reranked_results = rerank(
-        query,
-        rerank_function_top_k=20,
+    reranked_results = rerank_candidates(
+    query,
+    chroma_results,
+    top_k=20,
     )
 
     reranked_ids = [

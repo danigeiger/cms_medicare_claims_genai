@@ -1,3 +1,4 @@
+
 from sentence_transformers import CrossEncoder
 
 from src.retrieval.retrieval import retrieve
@@ -8,16 +9,12 @@ reranker_model = CrossEncoder(
 )
 
 
-def rerank(
+def rerank_candidates(
     query: str,
-    rerank_function_top_k: int = 5,
+    chroma_results: dict,
+    top_k: int = 20,
 ) -> list[dict]:
-    """Retrieve CMS candidates and rerank them with a cross-encoder."""
-
-    chroma_results = retrieve(
-        query,
-        retrieve_function_top_k=20,
-    )
+    """Rerank already-retrieved Chroma candidates."""
 
     retrieved_cms_documents = chroma_results["documents"][0]
     retrieved_cms_metadata = chroma_results["metadatas"][0]
@@ -26,6 +23,9 @@ def rerank(
         [query, cms_document]
         for cms_document in retrieved_cms_documents
     ]
+
+    if not query_document_pairs:
+        return []
 
     reranker_scores = reranker_model.predict(
         query_document_pairs
@@ -50,7 +50,25 @@ def rerank(
         reverse=True,
     )
 
-    return reranked_cms_candidates[:rerank_function_top_k]
+    return reranked_cms_candidates[:top_k]
+
+
+def rerank(
+    query: str,
+    rerank_function_top_k: int = 5,
+) -> list[dict]:
+    """Retrieve CMS candidates and rerank them."""
+
+    chroma_results = retrieve(
+        query,
+        retrieve_function_top_k=20,
+    )
+
+    return rerank_candidates(
+        query,
+        chroma_results,
+        top_k=rerank_function_top_k,
+    )
 
 
 if __name__ == "__main__":
