@@ -3,7 +3,8 @@ from dotenv import load_dotenv
 from openai import OpenAI
 from pydantic import BaseModel
 
-from src.retrieval.reranker import rerank
+from src.retrieval.retrieval import retrieve_exact
+from src.retrieval.reranker import rerank_candidates
 
 
 # Load environment variables from .env
@@ -19,11 +20,21 @@ class CMSAnswer(BaseModel):
 
 
 def get_cms_context(query: str) -> list[dict]:
-    """Retrieve and rerank CMS codebook candidates."""
+    """Retrieve CMS candidates using exact search, then rerank."""
 
-    reranked_cms_candidates = rerank(
+    # Step 1: Retrieve the 20 closest CMS variables
+    # using exact NumPy distance calculations.
+    retrieval_results = retrieve_exact(
         query,
-        rerank_function_top_k=5,
+        retrieve_function_top_k=20,
+    )
+
+    # Step 2: Rerank those 20 candidates using CrossEncoder.
+    # Keep the 5 most relevant candidates for the LLM.
+    reranked_cms_candidates = rerank_candidates(
+        query,
+        retrieval_results,
+        top_k=5,
     )
 
     return reranked_cms_candidates
@@ -110,3 +121,4 @@ if __name__ == "__main__":
     print(f"Variable: {cms_answer.variable}")
     print(f"Label: {cms_answer.label}")
     print(f"Explanation: {cms_answer.explanation}")
+

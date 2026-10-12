@@ -174,3 +174,58 @@ def test_rag_evaluation_retrieves_once(monkeypatch):
 
     assert calls["retrieve"] == 1
     assert calls["generate"] == 2
+
+def test_main_rag_uses_exact_retrieval(monkeypatch):
+    """Main RAG must use exact retrieval and reuse its candidates."""
+
+    from src.rag import rag
+
+    calls = {"exact": 0, "rerank": 0}
+
+    fake_results = {
+        "ids": [["BENE_RACE_CD"]],
+        "documents": [["Label: Beneficiary Race Code"]],
+        "metadatas": [[{
+            "variable": "BENE_RACE_CD",
+            "label": "Beneficiary Race Code",
+        }]],
+    }
+
+    fake_candidates = [{
+        "variable": "BENE_RACE_CD",
+        "label": "Beneficiary Race Code",
+        "document": "Label: Beneficiary Race Code",
+        "reranker_score": 0.9,
+    }]
+
+    def fake_retrieve_exact(query, retrieve_function_top_k=20):
+        calls["exact"] += 1
+        assert query == "What is the patient's race?"
+        assert retrieve_function_top_k == 20
+        return fake_results
+
+    def fake_rerank_candidates(query, results, top_k=5):
+        calls["rerank"] += 1
+        assert results is fake_results
+        assert top_k == 5
+        return fake_candidates
+
+    monkeypatch.setattr(
+        rag,
+        "retrieve_exact",
+        fake_retrieve_exact,
+    )
+
+    monkeypatch.setattr(
+        rag,
+        "rerank_candidates",
+        fake_rerank_candidates,
+    )
+
+    candidates = rag.get_cms_context(
+        "What is the patient's race?"
+    )
+
+    assert calls["exact"] == 1
+    assert calls["rerank"] == 1
+    assert candidates == fake_candidates
