@@ -57,7 +57,9 @@ cms_codebook_vectors/
 # Keep directory in Git
 !vector_store/.gitkeep
 
-
 # Logs / temporary files
 *.log
 *.tmp
+
+# Diagnostic databases
+chroma_diagnostic_db/
