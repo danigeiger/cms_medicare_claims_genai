@@ -2,7 +2,7 @@
 
 A Retrieval-Augmented Generation (RAG) application that helps users identify and understand variables in the **CMS Medicare Fee-for-Service (FFS) Claims Codebook** using natural-language questions.
 
-The application combines semantic search, transformer-based reranking, OpenAI language models, and a FastAPI interface to retrieve relevant CMS variable definitions and generate structured answers.
+The application combines exact vector retrieval over Chroma-stored embeddings, transformer-based reranking, reciprocal rank fusion (RRF), OpenAI language models, and a FastAPI interface to retrieve relevant CMS variable definitions and generate structured answers.
 
 ## Project Overview
 
@@ -56,53 +56,52 @@ The CMS codebook is parsed into structured variable records. Each record is conv
 ### 2. RAG Question-Answering Pipeline
 
 ```text
-       User Question
+        User Question
              |
              v
-       FastAPI /ask
+        FastAPI /ask
              |
              v
           rag.py
              |
              v
-        retrieval.py
+      MiniLM query embedding
              |
              v
-       Chroma Database
-       Top 20 Candidates
+     Chroma persistent store
+     + exact NumPy search
+        Top 20 candidates
              |
              v
-         reranker.py
-     CrossEncoder Reranking
+       CrossEncoder reranks
+       same 20 candidates
              |
              v
-       Top 5 Candidates
+      Reciprocal Rank Fusion
+       (exact + reranked)
              |
              v
-       OpenAI GPT-4.1-mini
+         Top 5 documents
              |
              v
-     Structured CMSAnswer
+        GPT-4.1-mini
              |
              v
-       FastAPI JSON Response
+       Structured CMSAnswer
+             |
+             v
+        FastAPI JSON response
 ```
 
-### Retrieval and Reranking
+### Retrieval, Reranking, and Fusion
 
-The system uses two complementary transformer models:
+**Embedding model:** `sentence-transformers/all-MiniLM-L6-v2` produces 384-dimensional embeddings for CMS variable documents and user questions.
 
-**Embedding model:** `sentence-transformers/all-MiniLM-L6-v2`
+The current main RAG pipeline calls `retrieve_exact()` to compare the query embedding against all **302 stored vectors** using NumPy squared Euclidean distance. **ChromaDB remains the persistent vector/document store**; its indexed `retrieve()` search is retained for experiments and comparison. Exact retrieval supplies the top **20** candidates.
 
-- Generates 384-dimensional embeddings.
-- Represents CMS variable descriptions and user questions as vectors.
-- Enables semantic similarity search in Chroma.
+**Reranking model:** `cross-encoder/ms-marco-MiniLM-L-6-v2` independently scores those same 20 candidates against the question. **Reciprocal Rank Fusion (RRF)** combines the exact-search and CrossEncoder rankings; the top **five** fused candidates are provided as context to the LLM.
 
-**Reranking model:** `cross-encoder/ms-marco-MiniLM-L-6-v2`
-
-- Evaluates the relevance of retrieved candidates against the original question.
-- Reorders the top 20 retrieved candidates.
-- Selects the five highest-scoring candidates for answer generation.
+This design arose from experiments investigating intermittent omissions in Chroma indexed retrieval and cases where reranking excluded the expected variable from the final five. The underlying cause of the intermittent indexed-search behavior is not established.
 
 ### Answer Generation
 
@@ -136,7 +135,8 @@ cms_medicare_claims_genai/
 |
 ├── docs/
 │   ├── cms_codebook.pdf
-│   └── retrieval_experiments.md
+│   ├── retrieval_experiments.md
+│   └── retrieval_experiments_integrated.md
 |
 ├── knowledge_base/
 │   └── processed/
@@ -152,17 +152,21 @@ cms_medicare_claims_genai/
 │   ├── retrieval/
 │   │   ├── retrieval.py
 │   │   ├── reranker.py
-│   │   └── evaluate_retrieval.py
+│   │   ├── evaluate_retrieval.py
+│   │   ├── evaluate_candidate_recall.py
+│   │   └── evaluate_rrf.py
 │   |
 │   ├── rag/
 │   │   ├── rag.py
-│   │   └── evaluate_rag.py
+│   │   ├── evaluate_exact_rag.py
+│   │   └── test_rrf_answer.py
 │   |
 │   └── api/
 │       └── main.py
 |
 ├── tests/
-│   └── test_api.py
+│   ├── test_api.py
+│   └── test_retrieval_regression.py
 |
 ├── cms_codebook_vectors/
 ├── .env
@@ -275,29 +279,42 @@ Example response:
 
 ## Evaluation Results
 
-The retrieval system was evaluated using 20 natural-language questions with expected CMS variable identifiers.
+All reported scores below come from **20-question development evaluations**, not a held-out test set. The questions and pipeline were refined during experimentation; these results do not establish accuracy on unseen queries. Retrieval top-k coverage and final LLM answer accuracy are different metrics.
 
-### Retrieval Experiments
+### Historical Retrieval Experiments
 
-| Experiment | Top-1 | Top-3 | Top-5 |
+| Configuration | Top-1 | Top-3 | Top-5 |
 |---|---:|---:|---:|
-| Initial Chroma retrieval | 60% | 80% | 95% |
-| Improved document labels | 60% | 90% | 100% |
-| CrossEncoder reranking (initial 5 candidates) | 80% | 100% | 100% |
+| Initial Chroma baseline | 60% | 80% | 95% |
+| Label-emphasized embeddings | 60% | 90% | 100% |
+| Early CrossEncoder experiment | 80% | 100% | 100% |
 
-Top-k accuracy measures whether the expected CMS variable appears within the first k ranked results.
+These figures are preserved from earlier configurations; they are **not** measurements of the current exact-search + RRF pipeline.
 
-The current implementation retrieves 20 candidates before reranking, but the table above reflects the earlier evaluated configurations. The revised 20-candidate configuration requires a separate full evaluation.
+### Updated Candidate Coverage
 
-### RAG Answer Evaluation
+On the revised 20-question development benchmark:
 
-The structured RAG pipeline was evaluated against 20 questions using exact variable-identifier matching.
+| Candidate ranking | Expected variable in top five |
+|---|---:|
+| CrossEncoder reranking | 19/20 (95%) |
+| Reciprocal Rank Fusion | **20/20 (100%)** |
 
-**Observed result: 19/20 correct (95%).**
+### End-to-End RAG Answers
 
-This result was recorded before the most recent retrieval expansion. Subsequent testing successfully identified `BENE_RACE_CD` for a previously unsuccessful race-related question, but a complete updated evaluation has not yet been performed.
+| Recorded evaluation | Correct selected variables |
+|---|---:|
+| Earlier pipeline | 19/20 (95%) |
+| Current exact NumPy + CrossEncoder + RRF + GPT-4.1-mini | **20/20 (100%)** |
 
-These results are preliminary and based on a small test set; they do not establish production-level accuracy.
+The latest run (`python -m src.rag.evaluate_exact_rag`) completed all **20 API requests**, with **20 correct selected identifiers** and **zero errors**. The development benchmark includes a clarified service-location question, so this before-and-after result is not an isolated causal estimate of RRF's effect.
+
+### Experiment Documentation
+
+- [Historical retrieval experiments](docs/retrieval_experiments.md) — original baseline, label emphasis, reranking, and RAG/RRF experiments, preserved in their historical context.
+- [Integrated retrieval experiments](docs/retrieval_experiments_integrated.md) — detailed RRF, exact-search, reliability investigations, engineering decisions, and current end-to-end evaluation.
+
+Run the latest evaluation with `python -m src.rag.evaluate_exact_rag` (requires a configured OpenAI API key and incurs API usage).
 
 ## Automated API Testing
 
@@ -317,7 +334,9 @@ The test suite verifies:
 
 The `/ask` test uses mocking to avoid live OpenAI API requests.
 
-**Latest test result: 3 passed.**
+**Previously recorded API test result: 3 passed.**
+
+Additional regression tests for retrieval, fusion, and mocked RAG integration: `python -m pytest tests/test_retrieval_regression.py -v` (**5 passed** in the latest recorded run).
 
 These tests validate API behavior rather than the accuracy of the underlying retrieval or language model.
 
@@ -328,8 +347,8 @@ Implemented:
 - PDF codebook ingestion and structured variable extraction.
 - SentenceTransformer embedding generation.
 - Persistent Chroma vector storage.
-- Semantic retrieval.
-- CrossEncoder reranking.
+- Exact NumPy candidate retrieval from persisted Chroma vectors; indexed Chroma retrieval retained for comparison.
+- CrossEncoder reranking and Reciprocal Rank Fusion (RRF).
 - Retrieval and RAG evaluation scripts.
 - OpenAI-based structured answer generation.
 - FastAPI endpoints.
@@ -337,8 +356,8 @@ Implemented:
 
 ### Planned Improvements
 
-- Reevaluate the expanded retrieval and reranking pipeline.
-- Expand the evaluation dataset and investigate inconsistent retrieval results.
+- Evaluate on a new, independent set of unseen questions.
+- Benchmark exact-retrieval latency and memory use; continue investigating intermittent indexed-search discrepancies.
 - Add error handling and logging.
 - Containerize the application with Docker.
 - Prepare for cloud deployment.
@@ -362,8 +381,6 @@ Jessica D. Geiger
 M.S. Data Science
 
 [GitHub](https://github.com/danigeiger) | [LinkedIn](https://www.linkedin.com/in/jessica-d-geiger/)
-
-## License
 
 ## License
 

@@ -1,4 +1,6 @@
-# Retrieval Experiments
+# Integrated Retrieval Experiments — Engineering History
+
+> **Reading guide (updated October 12, 2026):** This is a chronological engineering record. Earlier statements about proposed integrations and remaining work reflect their status at the time and are superseded by the **Current Implementation and Final Development Evaluation** section at the end. For the original experiments, see [Historical Retrieval Experiments](retrieval_experiments.md).
 ## Experiment 0 — Baseline
 **Embedding model:** `sentence-transformers/all-MiniLM-L6-v2`
 
@@ -492,3 +494,62 @@ For the current **302-variable, 384-dimensional** collection, exact NumPy search
 
 The project evolved from basic embedding similarity into a multi-stage RAG retrieval system with empirical accuracy and reliability testing. The central engineering lesson is that **a strong reranker or language model cannot compensate for a relevant document that never enters the candidate set**. Exact retrieval offers a testable way to improve candidate-selection dependability for this small codebook, while the separate answer-generation evaluation remains essential for assessing the final system.
 
+
+
+---
+
+## Current Implementation and Final Development Evaluation — October 12, 2026
+
+### Implemented RAG pipeline
+
+The main `src/rag/rag.py` pipeline now uses the following sequence:
+
+1. Embed the natural-language question with `sentence-transformers/all-MiniLM-L6-v2`.
+2. Use `retrieve_exact()` in `src/retrieval/retrieval.py` to rank all **302 stored CMS variables** by NumPy squared Euclidean distance and return the top **20**. ChromaDB remains the persistent source of the stored embeddings, documents, and metadata.
+3. Use `rerank_candidates()` and `cross-encoder/ms-marco-MiniLM-L-6-v2` to rerank those **same 20 candidates**, without issuing a second retrieval query.
+4. Use `calculate_rrf()` with reciprocal rank fusion to combine the exact-search and CrossEncoder rankings, then pass the top **five** documents to GPT-4.1-mini.
+5. Return a Pydantic `CMSAnswer` containing `variable`, `label`, and `explanation`; score the predicted variable using exact identifier matching.
+
+The indexed Chroma `retrieve()` function remains available for diagnostic comparison; the main RAG path uses `retrieve_exact()`. The application loads `OPENAI_API_KEY` from the local `.env` file via `load_dotenv()`. Secrets are not included in version control.
+
+### Most recent observed evaluation
+
+Command: `python -m src.rag.evaluate_exact_rag`
+
+| Measure | Result |
+|---|---:|
+| Questions | 20 |
+| Successful API responses | 20 |
+| Correct selected CMS variables | 20 |
+| Accuracy on completed questions | **100% (20/20)** |
+| Overall success rate | **100% (20/20)** |
+| Incorrect answers or API errors | 0 |
+
+An earlier end-to-end evaluation returned **19/20 (95%)**. The most recent exact-search + CrossEncoder + RRF pipeline returned **20/20 (100%)** on the revised development benchmark. This is a comparison of recorded development runs, **not a controlled independent generalization estimate or proof that any single component caused the improvement**.
+
+The place-of-service question was revised during development to clarify the intended claim-line service-setting concept. For the revised query, `LINE_PLACE_OF_SRVC_CD` ranked **third** under exact retrieval, **sixth** under CrossEncoder, and **fourth** after RRF; inclusion in the top-five context allowed GPT-4.1-mini to select the expected variable. These ranks and the original ambiguous-query experiments refer to **different question wordings** and should not be conflated.
+
+### Retrieval coverage and automated regression tests
+
+On the revised 20-question development set, the candidate-recall experiment reported:
+
+| Ranking strategy | Expected variable present in top five |
+|---|---:|
+| CrossEncoder | 19/20 (95%) |
+| RRF | 20/20 (100%) |
+
+Command: `python -m src.retrieval.evaluate_candidate_recall`
+
+Five regression tests passed using:
+
+`python -m pytest tests/test_retrieval_regression.py -v`
+
+These tests cover the beneficiary-race exact-retrieval case, reranker reuse of existing candidates, RRF combination, and mocked RAG generation and integration. Mocked tests do not replace live API evaluation.
+
+### Limitations and next experiments
+
+- All reported 20-question evaluations used a small development benchmark that influenced the pipeline and question wording; performance on unseen questions remains unknown.
+- Earlier experiments using the original ambiguous service-location question are preserved above as historical observations; they are not directly comparable to results on the revised question.
+- Exact NumPy retrieval avoids approximate-neighbor omissions for this small stored collection but does not improve the semantic meaning of embeddings. The internal root cause of intermittent Chroma indexed-search discrepancies remains unverified.
+- Benchmark retrieval latency and memory requirements before scaling beyond the current 302-variable collection.
+- Construct a larger, independent holdout with paraphrases, ambiguity cases, and unsupported questions; compare alternative pipelines on identical questions under controlled conditions.

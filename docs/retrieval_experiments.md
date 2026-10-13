@@ -1,4 +1,6 @@
-# Retrieval Experiments
+# Retrieval Experiments — Historical Record
+
+> **Historical experiments:** This document preserves the original retrieval and RAG experiments, including earlier configurations, benchmarks, and next steps as recorded at the time. Some described next steps have since been completed. For later investigations and the current implementation, see [Integrated Retrieval Experiments](retrieval_experiments_integrated.md). The 20-question development set was reused during optimization and is not an independent holdout.
 
 ## Experiment 0 — Baseline
 
