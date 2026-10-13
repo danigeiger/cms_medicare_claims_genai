@@ -1,0 +1,660 @@
+{
+  "summary": {
+    "mode": "retrieval",
+    "total_questions": 50,
+    "recall_at_5": 0.96,
+    "retrieval_hits": 48
+  },
+  "results": [
+    {
+      "id": 1,
+      "question": "For a hospital inpatient claim, which field totals charges for accommodations and services that Medicare did not cover?",
+      "expected_variable": "NCH_IP_NCVRD_CHRG_AMT",
+      "retrieved_variables": [
+        "NCH_IP_NCVRD_CHRG_AMT",
+        "REV_CNTR_PRVDR_PMT_AMT",
+        "CLM_PMT_AMT",
+        "CLM_PASS_THRU_PER_DIEM_AMT",
+        "CLM_MODEL_REIMBRSMT_AMT"
+      ],
+      "recall_at_5": true
+    },
+    {
+      "id": 2,
+      "question": "Which older physician identifier records the doctor responsible for certifying medical necessity on an institutional claim?",
+      "expected_variable": "AT_PHYSN_UPIN",
+      "retrieved_variables": [
+        "AT_PHYSN_UPIN",
+        "OP_PHYSN_NPI",
+        "OT_PHYSN_NPI",
+        "AT_PHYSN_NPI",
+        "OT_PHYSN_UPIN"
+      ],
+      "recall_at_5": true
+    },
+    {
+      "id": 3,
+      "question": "For an anesthesia procedure billed on a carrier claim, where is the base unit count recorded?",
+      "expected_variable": "CARR_LINE_ANSTHSA_UNIT_CNT",
+      "retrieved_variables": [
+        "CARR_LINE_ANSTHSA_UNIT_CNT",
+        "CARR_LINE_MTUS_CNT",
+        "REV_CNTR_UNIT_CNT",
+        "NCH_CARR_CLM_ALOWD_AMT",
+        "CLM_FREQ_CD"
+      ],
+      "recall_at_5": true
+    },
+    {
+      "id": 4,
+      "question": "Which claim field identifies the accountable care organization associated with a Medicare model?",
+      "expected_variable": "ACO_ID_NUM",
+      "retrieved_variables": [
+        "ACO_ID_NUM",
+        "CLM_NEXT_GNRTN_ACO_IND_CD5",
+        "CLM_MODEL_REIMBRSMT_AMT",
+        "REV_CNTR_APC_HIPPS_CD",
+        "EHR_PGM_RDCTN_IND_SW"
+      ],
+      "recall_at_5": true
+    },
+    {
+      "id": 5,
+      "question": "How can I tell whether the physician or supplier accepted assignment on a non-institutional claim?",
+      "expected_variable": "CARR_CLM_PRVDR_ASGNMT_IND_SW",
+      "retrieved_variables": [
+        "AT_PHYSN_NPI",
+        "OT_PHYSN_NPI",
+        "OP_PHYSN_NPI",
+        "AT_PHYSN_UPIN",
+        "OP_PHYSN_SPCLTY_CD"
+      ],
+      "recall_at_5": false
+    },
+    {
+      "id": 6,
+      "question": "What field indicates the position of a related-condition code in a claim's sequence?",
+      "expected_variable": "RLT_COND_CD_SEQ",
+      "retrieved_variables": [
+        "RLT_COND_CD_SEQ",
+        "CLM_RLT_COND_CD",
+        "RLT_VAL_CD_SEQ",
+        "RLT_OCRNC_CD_SEQ",
+        "CLM_RLT_OCRNC_CD"
+      ],
+      "recall_at_5": true
+    },
+    {
+      "id": 7,
+      "question": "Which revenue-center payment field is populated for certain outpatient claims processed through PPS PRICER, even though CMS recommends a different provider-payment field for more accurate Medicare payment analysis?",
+      "expected_variable": "REV_CNTR_PMT_AMT_AMT",
+      "retrieved_variables": [
+        "REV_CNTR_PRVDR_PMT_AMT",
+        "REV_CNTR_APC_HIPPS_CD",
+        "REV_CNTR_PMT_AMT_AMT",
+        "REV_CNTR_RDCD_COINSRNC_AMT",
+        "FINL_STD_AMT"
+      ],
+      "recall_at_5": true
+    },
+    {
+      "id": 8,
+      "question": "Which identifier tells me which Medicare carrier or administrative contractor processed a physician claim?",
+      "expected_variable": "CARR_NUM",
+      "retrieved_variables": [
+        "CARR_PRFRNG_PIN_NUM",
+        "AT_PHYSN_UPIN",
+        "AT_PHYSN_NPI",
+        "OP_PHYSN_NPI",
+        "OP_PHYSN_SPCLTY_CD"
+      ],
+      "recall_at_5": false
+    },
+    {
+      "id": 9,
+      "question": "On an institutional claim, where is the dollar amount associated with a reported claim value code stored?",
+      "expected_variable": "CLM_VAL_AMT",
+      "retrieved_variables": [
+        "CLM_VAL_CD",
+        "CLM_VAL_AMT",
+        "CLM_SPAN_CD",
+        "ICD_PRCDR_CD25",
+        "CLM_FREQ_CD"
+      ],
+      "recall_at_5": true
+    },
+    {
+      "id": 10,
+      "question": "Which carrier-claim field counts the whole pints of blood supplied to a beneficiary?",
+      "expected_variable": "NCH_BLOOD_PNTS_FRNSHD_QTY",
+      "retrieved_variables": [
+        "CARR_CLM_RFRNG_PIN_NUM",
+        "NCH_BLOOD_PNTS_FRNSHD_QTY",
+        "CLM_BENE_PD_AMT",
+        "NCH_BENE_BLOOD_DDCTBL_LBLTY_AM",
+        "LINE_BENE_PTB_DDCTBL_AMT"
+      ],
+      "recall_at_5": true
+    },
+    {
+      "id": 11,
+      "question": "Which amount represents the capital-related indirect medical education adjustment paid to a teaching hospital under PPS?",
+      "expected_variable": "CLM_PPS_CPTL_IME_AMT",
+      "retrieved_variables": [
+        "CLM_PPS_CPTL_IME_AMT",
+        "IME_OP_CLM_VAL_AMT",
+        "CLM_TOT_PPS_CPTL_AMT",
+        "CLM_PPS_CPTL_EXCPTN_AMT",
+        "CLM_PPS_CPTL_DRG_WT_NUM"
+      ],
+      "recall_at_5": true
+    },
+    {
+      "id": 12,
+      "question": "Which code indicates why a hospital was excluded from the hospital value-based purchasing program?",
+      "expected_variable": "CLM_VBP_PRTCPNT_IND_CD",
+      "retrieved_variables": [
+        "CLM_VBP_PRTCPNT_IND_CD",
+        "CLM_VBP_ADJSTMT_PMT_AMT",
+        "CLM_POA_IND_SW25",
+        "CLM_E_POA_IND_SW12",
+        "CLM_VBP_ADJSTMT_PCT"
+      ],
+      "recall_at_5": true
+    },
+    {
+      "id": 13,
+      "question": "Which field records the beneficiary's Part A coinsurance liability on an institutional claim, including inpatient hospital or skilled nursing facility stays?",
+      "expected_variable": "NCH_BENE_PTA_COINSRNC_LBLTY_AM",
+      "retrieved_variables": [
+        "NCH_BENE_PTA_COINSRNC_LBLTY_AM",
+        "LINE_COINSRNC_AMT",
+        "NCH_BENE_PTB_COINSRNC_AMT",
+        "BENE_TOT_COINSRNC_DAYS_CNT",
+        "NCH_BENE_IP_DDCTBL_AMT"
+      ],
+      "recall_at_5": true
+    },
+    {
+      "id": 14,
+      "question": "I need the legacy UPIN of the doctor who referred a patient or ordered Part B services. Which field should I use?",
+      "expected_variable": "RFR_PHYSN_UPIN",
+      "retrieved_variables": [
+        "RFR_PHYSN_UPIN",
+        "AT_PHYSN_UPIN",
+        "ORDRNG_PHYSN_NPI",
+        "RNDRNG_PHYSN_UPIN",
+        "NCH_PROFNL_CMPNT_CHRG_AMT"
+      ],
+      "recall_at_5": true
+    },
+    {
+      "id": 15,
+      "question": "Which identifier names the home health or hospice organization whose care is being overseen by a physician?",
+      "expected_variable": "CPO_PRVDR_NUM",
+      "retrieved_variables": [
+        "CPO_ORG_NPI_NUM",
+        "CPO_PRVDR_NUM",
+        "CLM_ADMSN_DT",
+        "CLM_HOSPC_START_DT_ID",
+        "BENE_HOSPC_PRD_CNT"
+      ],
+      "recall_at_5": true
+    },
+    {
+      "id": 16,
+      "question": "Which code groups a claim payment adjustment into an adjustment category?",
+      "expected_variable": "CLM_ADJUST_GRP_CD",
+      "retrieved_variables": [
+        "REV_CNTR_ADJUST_GRP_CD",
+        "CLM_ADJUST_GRP_CD",
+        "LINE_ADJUST_GRP_CD",
+        "REV_CNTR_ADJUST_RSN_CD",
+        "LINE_ADJUST_RSN_CD"
+      ],
+      "recall_at_5": true
+    },
+    {
+      "id": 17,
+      "question": "Which outpatient revenue-center indicator describes the method used to price a service for payment?",
+      "expected_variable": "REV_CNTR_STUS_IND_CD",
+      "retrieved_variables": [
+        "REV_CNTR_STUS_IND_CD",
+        "REV_CNTR_PRVDR_PMT_AMT",
+        "REV_CNTR_PMT_AMT_AMT",
+        "REV_CNTR_APC_HIPPS_CD",
+        "REV_CNTR_PMT_MTHD_IND_CD"
+      ],
+      "recall_at_5": true
+    },
+    {
+      "id": 18,
+      "question": "For one service line on a physician claim, how much of the Part B deductible is the beneficiary responsible for?",
+      "expected_variable": "LINE_BENE_PTB_DDCTBL_AMT",
+      "retrieved_variables": [
+        "LINE_COINSRNC_AMT",
+        "LINE_BENE_PTB_DDCTBL_AMT",
+        "CARR_CLM_CASH_DDCTBL_APLD_AMT",
+        "REV_CNTR_BLOOD_DDCTBL_AMT",
+        "NCH_BENE_BLOOD_DDCTBL_LBLTY_AM"
+      ],
+      "recall_at_5": true
+    },
+    {
+      "id": 19,
+      "question": "Which revenue-center line field contains the NPI of the physician who ordered the service?",
+      "expected_variable": "ORDRNG_PHYSN_NPI",
+      "retrieved_variables": [
+        "ORDRNG_PHYSN_NPI",
+        "RNDRNG_PHYSN_UPIN",
+        "RNDRNG_PHYSN_NPI",
+        "PRF_PHYSN_UPIN",
+        "AT_PHYSN_NPI"
+      ],
+      "recall_at_5": true
+    },
+    {
+      "id": 20,
+      "question": "How many home health agency visits does CMS count for a claim?",
+      "expected_variable": "CLM_HHA_TOT_VISIT_CNT",
+      "retrieved_variables": [
+        "CLM_HHA_TOT_VISIT_CNT",
+        "NCH_BENE_PTA_COINSRNC_LBLTY_AM",
+        "REV_CNTR_DT",
+        "CLM_ADMSN_DT",
+        "CLM_HHA_LUPA_IND_CD"
+      ],
+      "recall_at_5": true
+    },
+    {
+      "id": 21,
+      "question": "Which revenue-center amount represents the unit cost rate associated with the revenue code?",
+      "expected_variable": "REV_CNTR_RATE_AMT",
+      "retrieved_variables": [
+        "REV_CNTR",
+        "REV_CNTR_RATE_AMT",
+        "REV_CNTR_PRCNG_IND_CD",
+        "REV_CNTR_NCVRD_CHRG_AMT",
+        "REV_CNTR_UNIT_CNT"
+      ],
+      "recall_at_5": true
+    },
+    {
+      "id": 22,
+      "question": "Where is the initial Medicare Severity DRG classification for an inpatient claim recorded?",
+      "expected_variable": "CLM_IP_INITL_MS_DRG_CD",
+      "retrieved_variables": [
+        "CLM_IP_INITL_MS_DRG_CD",
+        "MS_DRG_GRPR_VRSN_CD",
+        "REV_CNTR_APC_HIPPS_CD",
+        "REV_CNTR_PRVDR_PMT_AMT",
+        "CLM_DRG_CD"
+      ],
+      "recall_at_5": true
+    },
+    {
+      "id": 23,
+      "question": "Which field indicates whether a claim was submitted with a HICN or an MBI during the identifier transition?",
+      "expected_variable": "CLM_BENE_ID_TYPE_CD",
+      "retrieved_variables": [
+        "CLM_BENE_ID_TYPE_CD",
+        "CLM_E_POA_IND_SW12",
+        "CLM_POA_IND_SW25",
+        "RR_BRD_EXCLSN_IND_SW",
+        "HAC_PGM_RDCTN_IND_SW"
+      ],
+      "recall_at_5": true
+    },
+    {
+      "id": 24,
+      "question": "Which CMS variable stores the seventh available indicator identifying why a carrier claim-line payment was adjusted?",
+      "expected_variable": "LINE_OTHR_APLD_IND_CD7",
+      "retrieved_variables": [
+        "LINE_OTHR_APLD_IND_CD7",
+        "LINE_ADJUST_RSN_CD",
+        "CARR_CLM_BLG_NPI_NUM",
+        "LINE_ADJUST_GRP_CD",
+        "CLM_MODEL_4_READMSN_IND_CD"
+      ],
+      "recall_at_5": true
+    },
+    {
+      "id": 25,
+      "question": "Where is the first external-cause-of-injury diagnosis code on a claim recorded?",
+      "expected_variable": "FST_DGNS_E_CD",
+      "retrieved_variables": [
+        "ICD_DGNS_E_CD12",
+        "FST_DGNS_E_CD",
+        "PRNCPAL_DGNS_CD",
+        "ICD_DGNS_CD25",
+        "ICD_DGNS_VRSN_CD12"
+      ],
+      "recall_at_5": true
+    },
+    {
+      "id": 26,
+      "question": "Which field holds the third secondary specialty code of the clinician performing a service on a carrier claim?",
+      "expected_variable": "RNDRNG_PRVDR_SPCLTY_CD3",
+      "retrieved_variables": [
+        "BLG_PRVDR_SPCLTY_CD3",
+        "OP_PHYSN_SPCLTY_CD",
+        "RNDRNG_PRVDR_SPCLTY_CD3",
+        "OT_PHYSN_SPCLTY_CD",
+        "AT_PHYSN_SPCLTY_CD"
+      ],
+      "recall_at_5": true
+    },
+    {
+      "id": 27,
+      "question": "Which field gives the standardized Medicare payment amount calculated under PPS?",
+      "expected_variable": "PPS_STD_VAL_PYMT_AMT",
+      "retrieved_variables": [
+        "FINL_STD_AMT",
+        "PPS_STD_VAL_PYMT_AMT",
+        "REV_CNTR_PRVDR_PMT_AMT",
+        "CLM_PPS_CPTL_DRG_WT_NUM",
+        "CLM_FULL_STD_PYMT_AMT"
+      ],
+      "recall_at_5": true
+    },
+    {
+      "id": 28,
+      "question": "On a carrier claim line, which code indicates what kind of provider furnished the service?",
+      "expected_variable": "CARR_LINE_PRVDR_TYPE_CD",
+      "retrieved_variables": [
+        "CARR_LINE_PRVDR_TYPE_CD",
+        "CARR_CLM_PMT_DNL_CD",
+        "LINE_PRVDR_VLDTN_TYPE_CD",
+        "CARR_LINE_PRCNG_LCLTY_CD",
+        "CARR_CLM_ENTRY_CD"
+      ],
+      "recall_at_5": true
+    },
+    {
+      "id": 29,
+      "question": "Which CMS variable stores the diagnosis code in the 25th diagnosis position on an institutional claim?",
+      "expected_variable": "ICD_DGNS_CD25",
+      "retrieved_variables": [
+        "ICD_DGNS_CD25",
+        "CLM_POA_IND_SW25",
+        "PRNCPAL_DGNS_CD",
+        "ADMTG_DGNS_CD",
+        "LINE_ICD_DGNS_CD"
+      ],
+      "recall_at_5": true
+    },
+    {
+      "id": 30,
+      "question": "Which code tells me the processing outcome or disposition of a claim record?",
+      "expected_variable": "CLM_DISP_CD",
+      "retrieved_variables": [
+        "CLM_DISP_CD",
+        "CLAIM_QUERY_CODE",
+        "CLM_RLT_OCRNC_CD",
+        "CLM_SPAN_CD",
+        "CLM_RLT_COND_CD"
+      ],
+      "recall_at_5": true
+    },
+    {
+      "id": 31,
+      "question": "For hospitals participating in BPCI Model 1, which field gives the percentage discount applied to DRG payments?",
+      "expected_variable": "CLM_BNDLD_MODEL_1_DSCNT_PCT",
+      "retrieved_variables": [
+        "CLM_BNDLD_MODEL_1_DSCNT_PCT",
+        "RC_MODEL_REIMBRSMT_AMT",
+        "CLM_MODEL_4_READMSN_IND_CD",
+        "CLM_BNDLD_ADJSTMT_PMT_AMT",
+        "CLM_PPS_CPTL_DRG_WT_NUM"
+      ],
+      "recall_at_5": true
+    },
+    {
+      "id": 32,
+      "question": "Across a whole claim rather than one line, how much Part B deductible is the beneficiary liable for?",
+      "expected_variable": "NCH_BENE_PTB_DDCTBL_AMT",
+      "retrieved_variables": [
+        "LINE_BENE_PTB_DDCTBL_AMT",
+        "LINE_COINSRNC_AMT",
+        "CARR_CLM_CASH_DDCTBL_APLD_AMT",
+        "NCH_BENE_PTB_DDCTBL_AMT",
+        "NCH_BENE_BLOOD_DDCTBL_LBLTY_AM"
+      ],
+      "recall_at_5": true
+    },
+    {
+      "id": 33,
+      "question": "Which field indicates whether the diagnosis code in the twelfth diagnosis position uses ICD-9 or ICD-10?",
+      "expected_variable": "ICD_DGNS_VRSN_CD12",
+      "retrieved_variables": [
+        "ICD_DGNS_VRSN_CD12",
+        "LINE_ICD_DGNS_VRSN_CD",
+        "PRNCPAL_DGNS_VRSN_CD",
+        "ICD_DGNS_CD25",
+        "CLM_E_POA_IND_SW12"
+      ],
+      "recall_at_5": true
+    },
+    {
+      "id": 34,
+      "question": "Which revenue-center field reports the 15 percent reduction associated with PTA or OTA services using CO or CQ modifiers?",
+      "expected_variable": "REV_CNTR_THRPY_RDCTN_AMT",
+      "retrieved_variables": [
+        "REV_CNTR_THRPY_RDCTN_AMT",
+        "REV_CNTR_CRA_TPNIES_AMT",
+        "REV_CNTR_PRVDR_PMT_AMT",
+        "REV_CNTR_RDCD_COINSRNC_AMT",
+        "REV_CNTR_PMT_AMT_AMT"
+      ],
+      "recall_at_5": true
+    },
+    {
+      "id": 35,
+      "question": "Which field represents what Medicare would have reimbursed for hospital services covered by a global-budget payment model, even when the actual claim payment is zero?",
+      "expected_variable": "CLM_MODEL_REIMBRSMT_AMT",
+      "retrieved_variables": [
+        "CLM_MODEL_REIMBRSMT_AMT",
+        "RC_MODEL_REIMBRSMT_AMT",
+        "REV_CNTR_PRVDR_PMT_AMT",
+        "CLM_PMT_AMT",
+        "CLM_PASS_THRU_PER_DIEM_AMT"
+      ],
+      "recall_at_5": true
+    },
+    {
+      "id": 36,
+      "question": "Which carrier-line field contains the contractor-assigned PIN of the provider who performed the service?",
+      "expected_variable": "CARR_PRFRNG_PIN_NUM",
+      "retrieved_variables": [
+        "CARR_PRFRNG_PIN_NUM",
+        "CARR_CLM_RFRNG_PIN_NUM",
+        "CARR_LINE_PRVDR_TYPE_CD",
+        "PRF_PHYSN_NPI",
+        "PRF_PHYSN_UPIN"
+      ],
+      "recall_at_5": true
+    },
+    {
+      "id": 37,
+      "question": "Which amount totals the Part B cash deductible applied across all lines of a carrier claim?",
+      "expected_variable": "CARR_CLM_CASH_DDCTBL_APLD_AMT",
+      "retrieved_variables": [
+        "CARR_CLM_CASH_DDCTBL_APLD_AMT",
+        "LINE_BENE_PTB_DDCTBL_AMT",
+        "LINE_COINSRNC_AMT",
+        "NCH_BENE_PTB_DDCTBL_AMT",
+        "CLM_BENE_PD_AMT"
+      ],
+      "recall_at_5": true
+    },
+    {
+      "id": 38,
+      "question": "Which field indicates whether an individual service on a non-institutional claim is subject to a deductible?",
+      "expected_variable": "LINE_SERVICE_DEDUCTIBLE",
+      "retrieved_variables": [
+        "LINE_SERVICE_DEDUCTIBLE",
+        "CARR_CLM_CASH_DDCTBL_APLD_AMT",
+        "NCH_BENE_IP_DDCTBL_AMT",
+        "LINE_1ST_EXPNS_DT",
+        "LINE_BENE_PTB_DDCTBL_AMT"
+      ],
+      "recall_at_5": true
+    },
+    {
+      "id": 39,
+      "question": "Which code distinguishes the type and priority of an inpatient hospital admission?",
+      "expected_variable": "CLM_IP_ADMSN_TYPE_CD",
+      "retrieved_variables": [
+        "CLM_IP_ADMSN_TYPE_CD",
+        "CLM_E_POA_IND_SW12",
+        "CLM_POA_IND_SW25",
+        "CLM_SRC_IP_ADMSN_CD",
+        "CLM_HRR_PRTCPNT_IND_CD"
+      ],
+      "recall_at_5": true
+    },
+    {
+      "id": 40,
+      "question": "Where is the additional DRG outlier payment approved for an unusually costly PPS hospital stay recorded?",
+      "expected_variable": "NCH_DRG_OUTLIER_APRVD_PMT_AMT",
+      "retrieved_variables": [
+        "NCH_DRG_OUTLIER_APRVD_PMT_AMT",
+        "CLM_SS_OUTLIER_STD_PYMT_AMT",
+        "CLM_DRG_OUTLIER_STAY_CD",
+        "CLM_FULL_STD_PYMT_AMT",
+        "CLM_PPS_CPTL_DRG_WT_NUM"
+      ],
+      "recall_at_5": true
+    },
+    {
+      "id": 41,
+      "question": "For durable medical equipment, which line amount represents the purchase price or the purchase cap used for rental limits?",
+      "expected_variable": "LINE_DME_PRCHS_PRICE_AMT",
+      "retrieved_variables": [
+        "LINE_DME_PRCHS_PRICE_AMT",
+        "LINE_PMT_80_100_CD",
+        "LINE_ALOWD_CHRG_AMT",
+        "LINE_OTHR_APLD_AMT7",
+        "CLM_VBP_ADJSTMT_PMT_AMT"
+      ],
+      "recall_at_5": true
+    },
+    {
+      "id": 42,
+      "question": "Which field identifies the CMS specialty classification of the practitioner who referred the beneficiary?",
+      "expected_variable": "RFR_PHYSN_SPCLTY_CD",
+      "retrieved_variables": [
+        "RNDRNG_PHYSN_SPCLTY_CD",
+        "RFR_PHYSN_SPCLTY_CD",
+        "OP_PHYSN_SPCLTY_CD",
+        "CLM_BENE_ID_TYPE_CD",
+        "OT_PHYSN_SPCLTY_CD"
+      ],
+      "recall_at_5": true
+    },
+    {
+      "id": 43,
+      "question": "Which revenue-center indicator tells me a service is bundled into payment for another service?",
+      "expected_variable": "REV_CNTR_PACKG_IND_CD",
+      "retrieved_variables": [
+        "REV_CNTR_PACKG_IND_CD",
+        "REV_CNTR_PMT_MTHD_IND_CD",
+        "REV_CNTR_STUS_IND_CD",
+        "REV_CNTR_DSCNT_IND_CD",
+        "REV_CNTR_PMT_AMT_AMT"
+      ],
+      "recall_at_5": true
+    },
+    {
+      "id": 44,
+      "question": "What is the total Medicare trust-fund payment made to a provider for services on an outpatient claim?",
+      "expected_variable": "CLM_OP_PRVDR_PMT_AMT",
+      "retrieved_variables": [
+        "REV_CNTR_PRVDR_PMT_AMT",
+        "CLM_OP_PRVDR_PMT_AMT",
+        "CLM_OP_BENE_PMT_AMT",
+        "CLM_PMT_AMT",
+        "LINE_NCH_PMT_AMT"
+      ],
+      "recall_at_5": true
+    },
+    {
+      "id": 45,
+      "question": "Which NCH record identification code specifies the kind of claim record being processed?",
+      "expected_variable": "NCH_NEAR_LINE_REC_IDENT_CD",
+      "retrieved_variables": [
+        "CLM_DISP_CD",
+        "NCH_NEAR_LINE_REC_IDENT_CD",
+        "NCH_CLM_TYPE_CD",
+        "CLAIM_QUERY_CODE",
+        "CLM_FREQ_CD"
+      ],
+      "recall_at_5": true
+    },
+    {
+      "id": 46,
+      "question": "Which CMS specialty code is used to price a non-institutional claim line based on the performing provider?",
+      "expected_variable": "PRVDR_SPCLTY",
+      "retrieved_variables": [
+        "PRVDR_SPCLTY",
+        "OP_PHYSN_SPCLTY_CD",
+        "BLG_PRVDR_SPCLTY_CD3",
+        "PRTCPTNG_IND_CD",
+        "LINE_PRCSG_IND_CD"
+      ],
+      "recall_at_5": true
+    },
+    {
+      "id": 47,
+      "question": "Which CMS variable stores the 12th external-cause diagnosis code associated with injury, poisoning, or another adverse effect?",
+      "expected_variable": "ICD_DGNS_E_CD12",
+      "retrieved_variables": [
+        "ICD_DGNS_E_CD12",
+        "FST_DGNS_E_CD",
+        "ICD_DGNS_VRSN_CD12",
+        "LINE_ICD_DGNS_CD",
+        "PRNCPAL_DGNS_CD"
+      ],
+      "recall_at_5": true
+    },
+    {
+      "id": 48,
+      "question": "Which revenue-center field may hold either an ambulatory payment classification code or a HIPPS code?",
+      "expected_variable": "REV_CNTR_APC_HIPPS_CD",
+      "retrieved_variables": [
+        "REV_CNTR_APC_HIPPS_CD",
+        "REV_CNTR_STUS_IND_CD",
+        "REV_CNTR_PMT_MTHD_IND_CD",
+        "REV_CNTR",
+        "REV_CNTR_ADJUST_GRP_CD"
+      ],
+      "recall_at_5": true
+    },
+    {
+      "id": 49,
+      "question": "Which code on a physician or supplier claim indicates who is paid or whether the claim was denied?",
+      "expected_variable": "CARR_CLM_PMT_DNL_CD",
+      "retrieved_variables": [
+        "CLM_PPS_IND_CD",
+        "OP_PHYSN_SPCLTY_CD",
+        "CARR_CLM_PMT_DNL_CD",
+        "LINE_PRCSG_IND_CD",
+        "CLM_ADJUST_RSN_CD"
+      ],
+      "recall_at_5": true
+    },
+    {
+      "id": 50,
+      "question": "Which NCH amount totals all line-item payments made to the provider for a claim?",
+      "expected_variable": "NCH_CLM_PRVDR_PMT_AMT",
+      "retrieved_variables": [
+        "NCH_CLM_PRVDR_PMT_AMT",
+        "NCH_CLM_BENE_PMT_AMT",
+        "LINE_NCH_PMT_AMT",
+        "NCH_CARR_CLM_ALOWD_AMT",
+        "LINE_PRVDR_PMT_AMT"
+      ],
+      "recall_at_5": true
+    }
+  ]
+}

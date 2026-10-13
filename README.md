@@ -159,6 +159,7 @@ cms_medicare_claims_genai/
 │   ├── rag/
 │   │   ├── rag.py
 │   │   ├── evaluate_exact_rag.py
+│   │   ├── evaluate_holdout.py
 │   │   └── test_rrf_answer.py
 │   |
 │   └── api/
@@ -166,6 +167,7 @@ cms_medicare_claims_genai/
 |
 ├── tests/
 │   ├── test_api.py
+│   ├── evaluation_holdout.json
 │   └── test_retrieval_regression.py
 |
 ├── cms_codebook_vectors/
@@ -279,7 +281,40 @@ Example response:
 
 ## Evaluation Results
 
-All reported scores below come from **20-question development evaluations**, not a held-out test set. The questions and pipeline were refined during experimentation; these results do not establish accuracy on unseen queries. Retrieval top-k coverage and final LLM answer accuracy are different metrics.
+The system was evaluated on a **20-question development benchmark** used during pipeline refinement and a separate **50-question holdout benchmark** created from the same CMS codebook. Retrieval Recall@5 measures whether the correct variable appears among the five candidates provided to the LLM; end-to-end exact-match accuracy measures whether the final selected variable matches the expected identifier.
+
+### Final 50-Question Holdout Evaluation
+
+| Metric | Result |
+|---|---:|
+| Questions | 50 |
+| Retrieval Recall@5 | **48/50 (96%)** |
+| End-to-end exact-match accuracy | **46/50 (92%)** |
+| API errors | **0** |
+
+The holdout set (`tests/evaluation_holdout.json`) was separate from the 20 development questions and had no overlapping expected variable identifiers. It was authored using records from the **same CMS codebook**, rather than independently collected real-user queries; therefore, these results do not establish production accuracy or generalization to all question styles.
+
+**Four incorrect final answers:**
+
+| Question | Expected variable | Predicted variable | Observed issue |
+|---|---|---|---|
+| 5 — Accepted assignment | `CARR_CLM_PRVDR_ASGNMT_IND_SW` | `null` | Expected variable absent from top five |
+| 8 — Medicare carrier identifier | `CARR_NUM` | `null` | Expected variable absent from top five |
+| 15 — Care-plan oversight organization | `CPO_PRVDR_NUM` | `CPO_ORG_NPI_NUM` | Correct variable retrieved; wrong final selection |
+| 32 — Claim-level Part B deductible liability | `NCH_BENE_PTB_DDCTBL_AMT` | `CARR_CLM_CASH_DDCTBL_APLD_AMT` | Correct variable retrieved; wrong final selection |
+
+Run the reproducible evaluation from the project root:
+
+```bash
+python -m src.rag.evaluate_holdout --mode retrieval
+python -m src.rag.evaluate_holdout --mode full
+```
+
+The full run requires an OpenAI API key and incurs API usage. Results are written to `evaluation_results/holdout_retrieval_results.json` and `evaluation_results/holdout_full_results.json`, respectively. Preserve the original holdout scores when investigating failures; tuning against this benchmark would make it a development set for subsequent iterations.
+
+### Development and Historical Experiments
+
+The following **20-question development scores** reflect pipeline tuning and should not be interpreted as independent test accuracy.
 
 ### Historical Retrieval Experiments
 
@@ -349,14 +384,14 @@ Implemented:
 - Persistent Chroma vector storage.
 - Exact NumPy candidate retrieval from persisted Chroma vectors; indexed Chroma retrieval retained for comparison.
 - CrossEncoder reranking and Reciprocal Rank Fusion (RRF).
-- Retrieval and RAG evaluation scripts.
+- Retrieval and RAG evaluation scripts, including a 50-question held-out benchmark.
 - OpenAI-based structured answer generation.
 - FastAPI endpoints.
 - Automated API tests.
 
 ### Planned Improvements
 
-- Evaluate on a new, independent set of unseen questions.
+- If the pipeline is modified after reviewing holdout failures, evaluate again on a fresh, independently collected question set.
 - Benchmark exact-retrieval latency and memory use; continue investigating intermittent indexed-search discrepancies.
 - Add error handling and logging.
 - Containerize the application with Docker.
@@ -366,7 +401,7 @@ Implemented:
 
 - The system retrieves variable definitions from a CMS codebook; it does not analyze actual patient claims.
 - LLM-generated answers may be incorrect and should be verified against official CMS documentation.
-- The current evaluation dataset is small.
+- The 50-question holdout is limited in size and was authored from the same codebook, not sampled from production user traffic.
 - The application requires an OpenAI API key and a locally available Chroma vector database.
 - The API is a development implementation and has not yet been hardened for public deployment.
 
