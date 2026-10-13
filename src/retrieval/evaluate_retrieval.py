@@ -60,7 +60,7 @@ TEST_QUERIES = [
         "expected": "LINE_NDC_CD",
     },
     {
-        "query": "Where was the service performed?",
+        "query": "What code identifies the type of location where an individual claim-line service was performed?",
         "expected": "LINE_PLACE_OF_SRVC_CD",
     },
     {

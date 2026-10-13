@@ -1,124 +1,116 @@
-
-from dotenv import load_dotenv
 from openai import OpenAI
 from pydantic import BaseModel
+from dotenv import load_dotenv
 
 from src.retrieval.retrieval import retrieve_exact
 from src.retrieval.reranker import rerank_candidates
+from src.retrieval.evaluate_rrf import calculate_rrf
 
-
-# Load environment variables from .env
 load_dotenv()
 
 
 class CMSAnswer(BaseModel):
-    """Structured answer identifying a CMS codebook variable."""
-
     variable: str | None
     label: str | None
     explanation: str
 
 
-def get_cms_context(query: str) -> list[dict]:
-    """Retrieve CMS candidates using exact search, then rerank."""
+def get_cms_context(query: str):
+    """
+    Retrieve CMS variables using exact similarity search,
+    CrossEncoder reranking, and Reciprocal Rank Fusion.
+    """
 
-    # Step 1: Retrieve the 20 closest CMS variables
-    # using exact NumPy distance calculations.
+    # Step 1: Retrieve the 20 closest CMS variables.
     retrieval_results = retrieve_exact(
         query,
         retrieve_function_top_k=20,
     )
 
-    # Step 2: Rerank those 20 candidates using CrossEncoder.
-    # Keep the 5 most relevant candidates for the LLM.
-    reranked_cms_candidates = rerank_candidates(
+    retrieval_ids = retrieval_results["ids"][0]
+
+    # Step 2: Rerank all 20 candidates with CrossEncoder.
+    reranked_candidates = rerank_candidates(
         query,
         retrieval_results,
-        top_k=5,
+        top_k=20,
     )
 
-    return reranked_cms_candidates
+    reranked_ids = [
+        candidate["variable"]
+        for candidate in reranked_candidates
+    ]
 
-
-def format_cms_context(
-    reranked_cms_candidates: list[dict],
-) -> str:
-    """Convert reranked CMS documents into readable LLM context."""
-
-    cms_document_texts = []
-
-    for candidate in reranked_cms_candidates:
-        cms_document_texts.append(
-            candidate["document"]
-        )
-
-    formatted_cms_context = "\n\n".join(
-        cms_document_texts
+    # Step 3: Combine both rankings using RRF.
+    rrf_ids = calculate_rrf(
+        retrieval_ids,
+        reranked_ids,
     )
 
-    return formatted_cms_context
+    # Step 4: Look up the candidate documents.
+    candidate_lookup = {
+        candidate["variable"]: candidate
+        for candidate in reranked_candidates
+    }
+
+    # Step 5: Select the five highest-ranked RRF candidates.
+    top_five = [
+        candidate_lookup[variable]
+        for variable in rrf_ids[:5]
+    ]
+
+    return top_five
+
+
+def format_cms_context(candidates):
+    """
+    Format retrieved CMS codebook entries for the LLM.
+    """
+
+    return "\n\n".join(
+        candidate["document"]
+        for candidate in candidates
+    )
 
 
 def generate_cms_answer(query: str) -> CMSAnswer:
-    """Generate a structured answer using CMS codebook context."""
+    """
+    Generate a structured CMS variable answer using GPT-4.1-mini.
+    """
 
-    # Step 1: Retrieve and rerank CMS variables
-    reranked_cms_candidates = get_cms_context(query)
+    candidates = get_cms_context(query)
+    context = format_cms_context(candidates)
 
-    # Step 2: Format the retrieved CMS documents
-    formatted_cms_context = format_cms_context(
-        reranked_cms_candidates
-    )
+    client = OpenAI()
 
-    # Step 3: Initialize the OpenAI client
-    openai_client = OpenAI()
-
-    # Step 4: Generate a structured CMS answer
-    llm_response = openai_client.responses.parse(
+    response = client.responses.parse(
         model="gpt-4.1-mini",
         instructions=(
-            "You are an assistant specializing in CMS Medicare "
-            "claims data dictionaries. "
-            "Answer the user's question using only the supplied "
-            "CMS codebook context. "
-            "Select the single most relevant CMS variable. "
-            "Return its exact variable identifier, label, "
-            "and a concise explanation of why it matches. "
-            "Do not invent CMS variables or definitions. "
-            "If the context does not contain sufficient information "
-            "to identify the correct variable, return null for "
-            "variable and label, and explain why."
+            "You are an assistant that identifies CMS Medicare "
+            "claims codebook variables. Use only the supplied "
+            "codebook context. Select the exact variable that "
+            "best answers the user's question. Do not invent "
+            "variable names. If no variable matches, return "
+            "null for variable and label."
         ),
         input=(
-            f"CMS CODEBOOK CONTEXT:\n"
-            f"{formatted_cms_context}\n\n"
-            f"USER QUESTION:\n"
-            f"{query}"
+            f"CMS codebook context:\n{context}\n\n"
+            f"Question: {query}"
         ),
         text_format=CMSAnswer,
     )
 
-    # Step 5: Extract the structured response
-    cms_answer = llm_response.output_parsed
-
-    if cms_answer is None:
-        raise ValueError(
-            "The LLM did not return a structured CMS answer."
-        )
-
-    return cms_answer
+    return response.output_parsed
 
 
 if __name__ == "__main__":
+    question = (
+        "What code identifies the type of location where an "
+        "individual claim-line service was performed?"
+    )
 
-    query = "What is the specialty of the attending physician?"
+    answer = generate_cms_answer(question)
 
-    print("\n=== Structured CMS Medicare RAG Test ===\n")
-    print(f"Question: {query}\n")
-
-    cms_answer = generate_cms_answer(query)
-
-    print(f"Variable: {cms_answer.variable}")
-    print(f"Label: {cms_answer.label}")
-    print(f"Explanation: {cms_answer.explanation}")
-
+    print(f"Variable: {answer.variable}")
+    print(f"Label: {answer.label}")
+    print(f"Explanation: {answer.explanation}")
