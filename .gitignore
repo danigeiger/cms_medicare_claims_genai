@@ -63,3 +63,6 @@ cms_codebook_vectors/
 
 # Diagnostic databases
 chroma_diagnostic_db/
+
+# Streamlit secrets
+.streamlit/secrets.toml
